@@ -31,6 +31,8 @@ function daily_power_summary(data, h, output_data, options) {
         summary_data[header] = [];
     }
 
+    console.log(options);
+
     for (let datapoint of data) {
         let date = datapoint[0];
 
@@ -41,6 +43,59 @@ function daily_power_summary(data, h, output_data, options) {
 
         let dateIndex = seen_dates[date];
 
+        // Calculate total demand pre-scaling
+
+        // TODO: Option to treat interconnects as high carbon?
+        const carbon_order = [
+            "solar",
+            "wind",
+            "hydro",
+            "nuclear",
+            "pumped_storage",
+            "biomass",
+            "other",
+            "intfr",
+            "intirl",
+            "inted",
+            "intew",
+            "intnem",
+            "intelec",
+            "intifa2",
+            "intnsl",
+            "ccgt",
+            "oil",
+            "ocgt",
+            "coal",
+        ];
+
+        let remaining_demand = datapoint[h["demand"]];
+
+        if (isNaN(remaining_demand)) {
+            console.log(remaining_demand, datapoint);
+        }
+
+        for (let supply of carbon_order) {
+            let value = datapoint[h[supply]] || 0;
+            if (supply == "solar") {
+                value *= options.scale_solar;
+            } else if (supply == "wind") {
+                value *= options.scale_wind;
+            }
+
+            if (value < remaining_demand) {
+                remaining_demand -= value;
+            } else {
+                value = remaining_demand;
+                remaining_demand = 0;
+            }
+
+            let day = summary_data[supply][dateIndex] || 0;
+            day += value;
+
+            summary_data[supply][dateIndex] = day;
+        }
+
+        /*
         for (let header in h) {
             // aggregate into days. Sum MWh generated?
             let day = summary_data[header][dateIndex];
@@ -51,17 +106,13 @@ function daily_power_summary(data, h, output_data, options) {
 
             let value = datapoint[h[header]] || 0;
 
-            if (header == "solar") {
-                value *= options.scale_solar;
-            } else if (header == "wind") {
-                value *= options.scale_wind;
-            }
-
             day += value;
 
             summary_data[header][dateIndex] = day;
-        }
+        }*/
     }
+
+    console.log(summary_data);
 
     for(let header in summary_data) {
         if (!output_data.hasOwnProperty(header)) {
@@ -104,6 +155,21 @@ function combine_solar_and_bmrs(solar, bmrs_data, bmrs_headers) {
     let headers = structuredClone(bmrs_headers);
     headers["solar"] = 20;
 
+    console.log(headers);
+    for(let datapoint of bmrs_data) {
+        let demand = 0;
+        
+        for (let header in headers) {
+            demand += (datapoint[headers[header]] || 0);
+        }
+        // Ensure solar datapoint exists
+        if (datapoint.length != 21) {
+            datapoint.push(0);
+        }
+        datapoint.push(demand);
+    }
+    headers["demand"] = 21;
+
     return [bmrs_data, headers];
 }
 
@@ -115,9 +181,12 @@ let chart_obj = null;
 
 export function recalculate_data() {
     let options = {
-        scale_solar: document.getElementById("scale_solar").value,
-        scale_wind: document.getElementById("scale_wind").value,
+        scale_solar: parseFloat(document.getElementById("scale_solar").value),
+        scale_wind: parseFloat(document.getElementById("scale_wind").value),
     };
+
+    document.getElementById("scale_wind_display").innerText = options.scale_wind;
+    document.getElementById("scale_solar_display").innerText = options.scale_solar;
 
     daily_power_summary(combined_data, combined_headers, summary_data, options);
 
@@ -137,6 +206,9 @@ export function main() {
 
     let datasets = [];
     for (let header in combined_headers) {
+        if (header == "demand") {
+            continue;
+        }
         datasets.push({
             label: header,
             data: summary_data[header],
@@ -172,5 +244,6 @@ export function main() {
         }
     });
 
-    document.getElementById("recalculate").onclick = () => recalculate_data();
+    document.getElementById("scale_wind").onchange = () => recalculate_data();
+    document.getElementById("scale_solar").onchange = () => recalculate_data();
 }

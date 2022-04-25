@@ -1,13 +1,45 @@
 <!DOCTYPE html>
 <html>
     <head>
-        <title>Energy Zero</title>
+        <title>GB Grid Zero Carbon Energy</title>
         <meta charset="utf-8" />
-        <script type="text/javascript" src="chart.min.js"></script>
-        <script src="https://cdn.jsdelivr.net/npm/luxon@^2"></script>
-        <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-luxon@^1"></script>
+        <script type="text/javascript" src="./chart.min.js"></script>
+        <script src="./luxon.plain.min.js"></script>
+        <script src="./chartjs-adapter-luxon.min.js"></script>
+        <link rel="stylesheet" type="text/css" href="./bootstrap.min.css" />
+        <style text="text/css">
+            body {
+                padding: 50px;
+            }
+            .options {
+                padding-left: 50px;
+                padding-top: 50px;
+                padding-bottom: 50px;
+            }
+            .scale_display::after {
+                content: "x";
+            }
+        </style>
     </head>
     <body>
+        <h1>
+            UK Grid Decarbonisation Simulator
+        </h1>
+        <div class="options">
+            Simulate increased solar/wind production
+            <div class="option">
+               <label for="scale_solar">Solar ☀: <span id="scale_solar_display" class="scale_display"></span></label><input name="scale_solar" id="scale_solar" type="range" min="1" max="10" value="1" step="0.1" />
+            </div>
+            <div class="option">
+                <label for="scale_wind">Wind 🍃💨: <span id="scale_wind_display" class="scale_display"></span></label><input name="scale_wind" id="scale_wind" type="range" min="1" max="10" value="1" step="0.1" />
+            </div>
+            <div>
+                Buttons not implemented yet:
+                <input type="button" value="Solar/Wind as they were" />
+                <input type="button" value="Simulate 2030 Off-Shore Wind Targets" />
+                <input type="button" value="Simulate 2040 Nuclear Projection" />
+            </div>
+        </div>
         <canvas id="myChart" width="1000" height="400"></canvas>
         <script type="module">
             console.log("test");
@@ -15,11 +47,6 @@
 
             main();
         </script>
-        <div>
-            Scale UK Output for: <label for="scale_solar">Solar ☀</label><input name="scale_solar" id="scale_solar" type="range" min="1" max="10" value="1" />
-            <label for="scale_wind">Wind 🍃💨</label><input name="scale_wind" id="scale_wind" type="range" min="1" max="10" value="1" />
-            <input type="button" value="Recalculate" id="recalculate" />
-        </div>
         <div>
             Data provided by <a href="https://www.bmreports.com/bmrs/?q=help/about-us">Balancing Mechanism Reporting Service</a> and <a href="https://www.solar.sheffield.ac.uk/pvlive/">Sheffield Solar</a>. Project inspired by <a href="https://grid.iamkate.com/">grid.iamkate.com</a>
         </div>
