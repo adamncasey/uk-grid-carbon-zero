@@ -11,6 +11,7 @@ export function RAW_ENERGY_HEADERS() {
         "intelec": 17,
         "intifa2": 18,
         "intnsl": 19,
+        "solar": 20,
         "ccgt": 2,
         "oil": 3,
         "coal": 4,
