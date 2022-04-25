@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Energy Zero</title>
+        <script type="text/javascript" src="chart.min.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/luxon@^2"></script>
+        <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-luxon@^1"></script>        
+    </head>
+    <body>
+        <canvas id="myChart" width="1000" height="400"></canvas>
+        <script type="module">
+            console.log("test");
+            import {main} from './main.js'
+
+            main();
+        </script>
+        <div>
+            Data provided by <a href="https://www.bmreports.com/bmrs/?q=help/about-us">Balancing Mechanism Reporting Service</a> and <a href="https://www.solar.sheffield.ac.uk/pvlive/">Sheffield Solar</a>. Project inspired by <a href="https://grid.iamkate.com/">grid.iamkate.com</a>
+        </div>
+    </body>
+</html>
