@@ -23,7 +23,7 @@ const COLOURS = {
     "solar": "rgba(249, 215, 28, 1.0)",
 }
 
-function daily_power_summary(data, h, output_data, options) {
+function daily_power_summary(data, h, output_data, period_summary, options) {
     let seen_dates = {};
     let dates = [];
     let summary_data = {};
@@ -94,30 +94,14 @@ function daily_power_summary(data, h, output_data, options) {
 
             summary_data[supply][dateIndex] = day;
         }
-
-        /*
-        for (let header in h) {
-            // aggregate into days. Sum MWh generated?
-            let day = summary_data[header][dateIndex];
-
-            if (!day) {
-                day = 0;
-            }
-
-            let value = datapoint[h[header]] || 0;
-
-            day += value;
-
-            summary_data[header][dateIndex] = day;
-        }*/
     }
 
-    console.log(summary_data);
-
+    let index = 0;
     for(let header in summary_data) {
         if (!output_data.hasOwnProperty(header)) {
             output_data[header] = [];
         }
+        period_summary[index] = 0;
 
         for(let date in summary_data[header]) {
             let y = summary_data[header][date] / 48; // 30min periods
@@ -125,12 +109,12 @@ function daily_power_summary(data, h, output_data, options) {
             let yyyymmdd = dates[date];
             let x = new Date(Date.UTC(Math.floor(yyyymmdd / 10000), Math.floor(yyyymmdd % 10000 / 100) - 1, Math.floor(yyyymmdd % 100)));
             output_data[header][date] = {x, y};
+
+            period_summary[index] += y;
         }
+
+        index += 1;
     }
-
-    console.log(output_data);
-
-    return output_data;
 }
 
 function combine_solar_and_bmrs(solar, bmrs_data, bmrs_headers) {
@@ -176,8 +160,10 @@ function combine_solar_and_bmrs(solar, bmrs_data, bmrs_headers) {
 let combined_data = [];
 let combined_headers = [];
 let summary_data = {};
+let period_summary_data = [];
 
 let chart_obj = null;
+let period_summary_pie = null;
 
 export function recalculate_data() {
     let options = {
@@ -188,9 +174,10 @@ export function recalculate_data() {
     document.getElementById("scale_wind_display").innerText = options.scale_wind;
     document.getElementById("scale_solar_display").innerText = options.scale_solar;
 
-    daily_power_summary(combined_data, combined_headers, summary_data, options);
+    daily_power_summary(combined_data, combined_headers, summary_data, period_summary_data, options);
 
     if (chart_obj) chart_obj.update();
+    if (period_summary_pie) period_summary_pie.update();
 }
 
 export function main() {
@@ -240,9 +227,52 @@ export function main() {
                         unit: 'month'
                     }
                 }
+            },
+            plugins: {
+                title: {
+                    display: true,
+                    text:"Power sources per day",
+                },
             }
         }
     });
+
+    const pie_ctx = document.getElementById("summary_chart").getContext("2d");
+
+    let labels = [];
+    let data = [];
+    let colours = [];
+    for (let header in combined_headers) {
+        labels.push(header);
+        colours.push(COLOURS[header]);
+    }
+
+    let pie_data = {
+        labels: labels,
+        datasets: [{
+            label: "Power sources over the whole period",
+            data: period_summary_data,
+            backgroundColor: colours,
+        }]
+    }
+
+    period_summary_pie = new Chart(pie_ctx, {
+        type: 'doughnut',
+        data: pie_data,
+        options: {
+            plugins: {
+                title: {
+                    display: true,
+                    text:"Where our energy came from over the whole period",
+                },
+                legend: {
+                    display: false,
+                },
+            },
+            maintainAspectRatio: false,
+        }
+    });
+
 
     document.getElementById("scale_wind").onchange = () => recalculate_data();
     document.getElementById("scale_solar").onchange = () => recalculate_data();

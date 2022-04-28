@@ -19,25 +19,45 @@
             .scale_display::after {
                 content: "x";
             }
+            .header-wrapper {
+                display: grid;
+                grid-template-columns: 1fr 25%;
+                gap: 10px;
+                height: 300px;
+            }
+            .header-left {
+                grid-column: 1 / 2;
+            }
+            .header-right {
+                grid-column: 2 / 2;
+                height: 300px;
+            }
         </style>
     </head>
     <body>
-        <h1>
-            UK Grid Decarbonisation Simulator
-        </h1>
-        <div class="options">
-            Simulate increased solar/wind production
-            <div class="option">
-               <label for="scale_solar">Solar ☀: <span id="scale_solar_display" class="scale_display"></span></label><input name="scale_solar" id="scale_solar" type="range" min="1" max="10" value="1" step="0.1" />
+        <div class="header-wrapper">
+            <div class="header-left">
+                <h1>
+                    UK Grid Decarbonisation Simulator
+                </h1>
+                <div class="options">
+                    Simulate increased solar/wind production
+                    <div class="option">
+                    <label for="scale_solar">Solar ☀: <span id="scale_solar_display" class="scale_display"></span></label><input name="scale_solar" id="scale_solar" type="range" min="1" max="10" value="1" step="0.1" />
+                    </div>
+                    <div class="option">
+                        <label for="scale_wind">Wind 🍃💨: <span id="scale_wind_display" class="scale_display"></span></label><input name="scale_wind" id="scale_wind" type="range" min="1" max="10" value="1" step="0.1" />
+                    </div>
+                    <div>
+                        Buttons not implemented yet:
+                        <input type="button" value="Solar/Wind as they were" />
+                        <input type="button" value="Simulate 2030 Off-Shore Wind Targets" />
+                        <input type="button" value="Simulate 2040 Nuclear Projection" />
+                    </div>
+                </div>
             </div>
-            <div class="option">
-                <label for="scale_wind">Wind 🍃💨: <span id="scale_wind_display" class="scale_display"></span></label><input name="scale_wind" id="scale_wind" type="range" min="1" max="10" value="1" step="0.1" />
-            </div>
-            <div>
-                Buttons not implemented yet:
-                <input type="button" value="Solar/Wind as they were" />
-                <input type="button" value="Simulate 2030 Off-Shore Wind Targets" />
-                <input type="button" value="Simulate 2040 Nuclear Projection" />
+            <div class="header-right">
+                <canvas id="summary_chart" width="300" height="300"></canvas>
             </div>
         </div>
         <canvas id="myChart" width="1000" height="400"></canvas>
